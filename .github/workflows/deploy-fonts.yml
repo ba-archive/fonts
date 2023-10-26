@@ -1,0 +1,27 @@
+name: Deploy fonts to API storage
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: "fonts"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: fonts rsync deploy
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_PASS_PRODUCTION }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "./"
+          REMOTE_HOST: ${{ secrets.SERVER_HOST_PRODUCTION }}
+          REMOTE_USER: ${{ secrets.SERVER_USER_PRODUCTION }}
+          TARGET: "/var/www/fonts"
+          EXCLUDE: ".git*,.md,.gitignore,.github,.DS_Store"
